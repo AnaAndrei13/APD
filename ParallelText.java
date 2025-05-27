@@ -1,0 +1,49 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class ParallelText {
+    public static void main(String[] args) {
+        Path filePath = Path.of("test1.txt"); // Specifică fișierul de analizat
+
+        // Variabilă pentru numărul total de cuvinte
+        int[] totalWords = {0};
+
+        // Începem cronometrarea
+        long startTime = System.nanoTime();
+
+        try (Stream<String> lines = Files.lines(filePath)) {
+            // Folosim Parallel Stream pentru procesare
+            Map<String, Integer> wordFrequency = lines
+                    .parallel() // Procesare paralelă
+                    .flatMap(line -> Stream.of(line.split("\\W+"))) // Împărțim liniile în cuvinte
+                    .map(String::toLowerCase) // Convertim la litere mici
+                    .filter(word -> !word.isEmpty()) // Eliminăm cuvintele goale
+                    .peek(word -> totalWords[0]++) // Numărăm totalul de cuvinte
+                    .collect(Collectors.toConcurrentMap(
+                            word -> word, // Cheia este cuvântul
+                            word -> 1, // Valoarea inițială este 1
+                            Integer::sum, // Adunăm frecvențele
+                            ConcurrentHashMap::new // Utilizăm ConcurrentHashMap pentru fire multiple
+                    ));
+
+            // Încheiem cronometrarea
+            long endTime = System.nanoTime();
+            double durationInSeconds = (endTime - startTime) / 1_000_000_000.0;
+
+            // Afișăm rezultatele
+            System.out.println("Total words: " + totalWords[0]);
+            System.out.println("Execution time: " + durationInSeconds + " seconds");
+            System.out.println("Word frequencies:");
+            wordFrequency.forEach((word, frequency) ->
+                    System.out.println(word + ": " + frequency));
+
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+        }
+    }
+}
