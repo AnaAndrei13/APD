@@ -8,27 +8,25 @@ import java.util.stream.Stream;
 
 public class ParallelText {
     public static void main(String[] args) {
-        Path filePath = Path.of("test1.txt"); // Specifică fișierul de analizat
+        Path filePath = Path.of("test1.txt"); 
 
-        // Variabilă pentru numărul total de cuvinte
         int[] totalWords = {0};
 
-        // Începem cronometrarea
         long startTime = System.nanoTime();
 
         try (Stream<String> lines = Files.lines(filePath)) {
-            // Folosim Parallel Stream pentru procesare
+            
             Map<String, Integer> wordFrequency = lines
                     .parallel() // Procesare paralelă
-                    .flatMap(line -> Stream.of(line.split("\\W+"))) // Împărțim liniile în cuvinte
-                    .map(String::toLowerCase) // Convertim la litere mici
-                    .filter(word -> !word.isEmpty()) // Eliminăm cuvintele goale
-                    .peek(word -> totalWords[0]++) // Numărăm totalul de cuvinte
+                    .flatMap(line -> Stream.of(line.split("\\W+")))
+                    .map(String::toLowerCase) 
+                    .filter(word -> !word.isEmpty()) 
+                    .peek(word -> totalWords[0]++) 
                     .collect(Collectors.toConcurrentMap(
-                            word -> word, // Cheia este cuvântul
-                            word -> 1, // Valoarea inițială este 1
-                            Integer::sum, // Adunăm frecvențele
-                            ConcurrentHashMap::new // Utilizăm ConcurrentHashMap pentru fire multiple
+                            word -> word, 
+                            word -> 1, 
+                            Integer::sum, 
+                            ConcurrentHashMap::new 
                     ));
 
             // Încheiem cronometrarea
