@@ -17,7 +17,7 @@ public class ParallelText {
         try (Stream<String> lines = Files.lines(filePath)) {
             
             Map<String, Integer> wordFrequency = lines
-                    .parallel() // Procesare paralelă
+                    .parallel() 
                     .flatMap(line -> Stream.of(line.split("\\W+")))
                     .map(String::toLowerCase) 
                     .filter(word -> !word.isEmpty()) 
@@ -29,11 +29,11 @@ public class ParallelText {
                             ConcurrentHashMap::new 
                     ));
 
-            // Încheiem cronometrarea
+           
             long endTime = System.nanoTime();
             double durationInSeconds = (endTime - startTime) / 1_000_000_000.0;
 
-            // Afișăm rezultatele
+           
             System.out.println("Total words: " + totalWords[0]);
             System.out.println("Execution time: " + durationInSeconds + " seconds");
             System.out.println("Word frequencies:");
